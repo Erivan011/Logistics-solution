@@ -1,1 +1,97 @@
 
+const express = require('express');
+const cors = require('cors');
+const app = express();
+
+// Configurações
+app.use(cors());
+app.use(express.json());
+
+// Dados de exemplo baseados na sua análise
+const entregas = [
+  { 
+    id: 1, 
+    destino: "Hospital São Lucas", 
+    status: "ENTREGUE", 
+    medicamentos: ["Dipirona 500mg", "Ibuprofeno 400mg"],
+    data: "2025-11-19",
+    tempoEntrega: "2 horas"
+  },
+  { 
+    id: 2, 
+    destino: "UBS Santana", 
+    status: "EM_TRANSITO", 
+    medicamentos: ["Paracetamol 750mg"],
+    data: "2025-11-19",
+    tempoEntrega: "1 hora"
+  },
+  { 
+    id: 3, 
+    destino: "Clínica Central", 
+    status: "PENDENTE", 
+    medicamentos: ["Amoxicilina 500mg"],
+    data: "2025-11-20",
+    tempoEntrega: "3 horas"
+  }
+];
+
+const estoque = [
+  { id: 1, medicamento: "Dipirona 500mg", quantidade: 150, categoria: "Analgésico" },
+  { id: 2, medicamento: "Ibuprofeno 400mg", quantidade: 80, categoria: "Anti-inflamatório" },
+  { id: 3, medicamento: "Paracetamol 750mg", quantidade: 200, categoria: "Analgésico" }
+];
+
+// Rotas da API
+app.get('/api/entregas', (req, res) => {
+  res.json({
+    success: true,
+    data: entregas,
+    total: entregas.length
+  });
+});
+
+app.get('/api/estoque', (req, res) => {
+  res.json({
+    success: true,
+    data: estoque,
+    total: estoque.length
+  });
+});
+
+app.get('/api/rastreamento/:id', (req, res) => {
+  const id = req.params.id;
+  const entrega = entregas.find(e => e.id == id);
+  
+  if (entrega) {
+    res.json({
+      success: true,
+      data: entrega
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      message: "Entrega não encontrada"
+    });
+  }
+});
+
+// Rota principal
+app.get('/', (req, res) => {
+  res.json({
+    sistema: "Logistics Solution API",
+    desenvolvedor: "Erivan Santos Marques - RA: 2223201673",
+    status: "Online",
+    endpoints: [
+      "/api/entregas",
+      "/api/estoque", 
+      "/api/rastreamento/:id"
+    ]
+  });
+});
+
+// Iniciar servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor Logistics Solution rodando na porta ${PORT}`);
+  console.log(`👨‍💻 Desenvolvido por: Erivan Santos Marques - RA: 2223201673`);
+});
