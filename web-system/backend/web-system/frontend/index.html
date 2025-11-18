@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistics Solution</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #667eea;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        header { 
+            background: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        header h1 { color: #2c5530; font-size: 2.5rem; }
+        nav { 
+            background: #2c5530; 
+            padding: 1rem 0; 
+            text-align: center;
+        }
+        nav a { 
+            color: white; 
+            text-decoration: none; 
+            padding: 1rem 2rem; 
+            margin: 0 0.5rem;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        footer {
+            background: #2c5530;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏥 Logistics Solution</h1>
+            <p>Erivan Santos Marques - RA: 2223201673</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="index.html">Início</a>
+            <a href="entregas.html">Entregas</a>
+            <a href="estoque.html">Estoque</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2>Sistema de Logística Farmacêutica</h2>
+            <p>Sistema completo para gestão de medicamentos</p>
+            <div id="dados"></div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Desenvolvido por Erivan Santos Marques - RA: 2223201673</p>
+        </div>
+    </footer>
+
+    <script>
+        fetch('http://localhost:3000/api/entregas')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('dados').innerHTML = 
+                    `<p>Total de entregas: ${data.total}</p>`;
+            });
+    </script>
+</body>
+</html>
