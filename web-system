@@ -1,13 +1,10 @@
-
 const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// Configurações
 app.use(cors());
 app.use(express.json());
 
-// Dados de exemplo baseados na sua análise
 const entregas = [
   { 
     id: 1, 
@@ -41,7 +38,6 @@ const estoque = [
   { id: 3, medicamento: "Paracetamol 750mg", quantidade: 200, categoria: "Analgésico" }
 ];
 
-// Rotas da API
 app.get('/api/entregas', (req, res) => {
   res.json({
     success: true,
@@ -75,7 +71,6 @@ app.get('/api/rastreamento/:id', (req, res) => {
   }
 });
 
-// Rota principal
 app.get('/', (req, res) => {
   res.json({
     sistema: "Logistics Solution API",
@@ -89,9 +84,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Iniciar servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor Logistics Solution rodando na porta ${PORT}`);
-  console.log(`👨‍💻 Desenvolvido por: Erivan Santos Marques - RA: 2223201673`);
+  console.log(`Servidor Logistics Solution rodando na porta ${PORT}`);
 });
