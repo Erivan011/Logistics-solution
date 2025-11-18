@@ -11,8 +11,8 @@ Sistema completo de logística farmacêutica que combina **análise de dados** c
 Desenvolver uma solução end-to-end para gestão logística de medicamentos, desde a análise preditiva até o sistema operacional.
 
 ## 🏗️ Estrutura do Projeto
-├── analysis/
-├── web-system/
-│ ├── backend/
-│ └── frontend/
-└── assets/
+analysis/
+web-system/
+backend/
+frontend/
+assets/
