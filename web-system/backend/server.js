@@ -1,38 +1,25 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-
-const entregas = [
-  { 
-    id: 1, 
-    destino: "Hospital São Lucas", 
-    status: "ENTREGUE", 
-    medicamentos: ["Dipirona 500mg", "Ibuprofeno 400mg"],
-    data: "2025-11-19"
-  },
-  { 
-    id: 2, 
-    destino: "UBS Santana", 
-    status: "EM_TRANSITO", 
-    medicamentos: ["Paracetamol 750mg"],
-    data: "2025-11-19"
-  }
-];
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    next();
+});
 
 app.get('/api/entregas', (req, res) => {
-  res.json({success: true, data: entregas, total: entregas.length});
+    res.json([
+        {id: 1, destino: "Hospital São Lucas", status: "Entregue"},
+        {id: 2, destino: "UBS Santana", status: "Em trânsito"}
+    ]);
 });
 
 app.get('/', (req, res) => {
-  res.json({
-    sistema: "Logistics Solution API",
-    desenvolvedor: "Erivan Santos Marques - RA: 2223201673"
-  });
+    res.json({mensagem: "API Logistics Solution funcionando!"});
 });
 
-app.listen(3000, () => {
-  console.log('Servidor rodando na porta 3000');
+const PORT = 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor rodando: http://localhost:${PORT}`);
+    console.log(`Acesse: http://localhost:${PORT}/api/entregas`);
 });
