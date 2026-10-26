@@ -212,9 +212,3 @@ docs/                       Arquitetura, algoritmo e exemplo reproduzível
 A inteligência desta versão é **otimização com restrições**, não um modelo de IA generativa ou machine learning treinado.
 
 A árvore atual contém apenas a aplicação nova. Os arquivos acadêmicos e a versão anterior podem ser consultados no histórico do Git.
-
-## Para apresentar em entrevista
-
-Explique o problema antes da ferramenta: “Como distribuir pedidos entre veículos sem exceder estoque, capacidade ou horário?”. Depois mostre uma restrição que força um pedido a ficar fora, compare duas simulações e abra os testes do verificador.
-
-A evolução foi desenvolvida com auxílio de IA. Entenda o código, reproduza os experimentos e explique os limites antes de apresentar domínio das decisões técnicas. Esta entrega não garante aprovação em processos seletivos.
