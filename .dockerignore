@@ -1,0 +1,9 @@
+.git
+.venv-planner
+node_modules
+planner/data
+planner/static
+planner-ui/dist
+__pycache__
+.pytest_cache
+*.zip

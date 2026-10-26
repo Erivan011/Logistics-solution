@@ -1,0 +1,12 @@
+node_modules/
+web-system/data/
+*.sqlite*
+.env
+coverage/
+.venv-planner/
+__pycache__/
+.pytest_cache/
+planner-ui/dist/
+*.db
+*.db-*
+planner/static/

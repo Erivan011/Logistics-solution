@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#102d29" />
+    <title>Logistics Solution · Central de operações</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Pular para o conteúdo</a>
+    <aside class="sidebar">
+      <a href="/" class="brand"
+        ><span class="brand-mark">L<span>↗</span></span
+        ><span>logistics<span class="brand-sub">SOLUTION</span></span></a
+      >
+      <p class="nav-label">WORKSPACE</p>
+      <nav aria-label="Navegação principal">
+        <button class="nav-item selected" data-view="overview">
+          <span>▦</span> Visão geral</button
+        ><button class="nav-item" data-view="deliveries">
+          <span>⇄</span> Entregas
+          <span class="nav-count" id="navCount">—</span></button
+        ><button class="nav-item" data-view="insights">
+          <span>◴</span> Indicadores
+        </button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="live-dot"></div>
+        <span>Operação conectada<small>São Paulo · Brasil</small></span>
+      </div>
+      <div class="profile">
+        <span class="avatar">ES</span>
+        <div>Erivan Santos<small>Portfólio · Logística e dados</small></div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <div class="breadcrumb">
+          Workspace <span>/</span> <strong>Central de operações</strong>
+        </div>
+        <div class="top-right">
+          <span class="demo-badge" id="demoLabel">PORTFÓLIO</span
+          ><span class="today" id="today"></span
+          ><span class="avatar small">ES</span>
+        </div>
+      </header>
+      <main id="main">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">CONTROLE DE PONTA A PONTA</p>
+            <h1 id="pageTitle">Sua operação, em movimento<span>.</span></h1>
+            <p class="subtitle" id="pageDescription">
+              Acompanhe entregas, antecipe atrasos e mantenha tudo sob controle.
+            </p>
+          </div>
+          <button class="primary" id="newDelivery">
+            <span>＋</span> Nova entrega
+          </button>
+        </div>
+        <div id="errorBanner" class="error-banner" role="alert" hidden></div>
+        <section
+          class="kpi-grid"
+          aria-label="Indicadores da operação"
+          id="kpis"
+        >
+          <div class="loading">Carregando indicadores…</div>
+        </section>
+        <div id="overviewContent">
+          <section class="overview-grid">
+            <article class="panel flow-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">PANORAMA DA OPERAÇÃO</p>
+                  <h2>Cada etapa importa.</h2>
+                </div>
+                <span class="subtle-tag">Todas as entregas</span>
+              </div>
+              <div class="flow" id="statusFlow"></div>
+              <div class="flow-footer">
+                <span
+                  ><i class="live-dot"></i> Dados atualizados a cada
+                  consulta</span
+                ><button class="text-button" id="refresh">Atualizar ↻</button>
+              </div>
+            </article>
+            <article class="attention-panel">
+              <p class="eyebrow">PRECISA DA SUA ATENÇÃO</p>
+              <div class="attention-number" id="lateCount">—</div>
+              <h2>entregas fora do prazo</h2>
+              <p>Priorize as pendências para manter a operação em dia.</p>
+              <button id="showLate">
+                Ver entregas atrasadas <span>↗</span>
+              </button>
+            </article>
+          </section>
+        </div>
+        <section
+          class="panel delivery-panel"
+          id="deliveriesSection"
+          aria-labelledby="deliveriesTitle"
+        >
+          <div class="panel-heading">
+            <div>
+              <h2 id="deliveriesTitle">
+                Entregas recentes
+                <span class="counter" id="resultCount">—</span>
+              </h2>
+              <p class="muted">Do cadastro à confirmação de recebimento.</p>
+            </div>
+            <a
+              class="secondary"
+              id="exportLink"
+              href="/api/entregas/exportar"
+              download
+              >↓ Exportar CSV</a
+            >
+          </div>
+          <div class="filters">
+            <label class="search-label"
+              ><span aria-hidden="true">⌕</span
+              ><input
+                id="search"
+                type="search"
+                maxlength="100"
+                placeholder="Buscar destino, produto ou lote…"
+                aria-label="Buscar entregas" /></label
+            ><label
+              ><span class="sr-only">Status</span
+              ><select id="statusFilter">
+                <option value="">Todos os status</option>
+                <option>Pendente</option>
+                <option>Em trânsito</option>
+                <option>Entregue</option>
+                <option>Cancelada</option>
+              </select></label
+            ><label
+              ><span class="sr-only">Prioridade</span
+              ><select id="priorityFilter">
+                <option value="">Todas as prioridades</option>
+                <option>Normal</option>
+                <option>Alta</option>
+                <option>Urgente</option>
+              </select></label
+            ><button class="filter-button" id="lateFilter" aria-pressed="false">
+              Só atrasadas</button
+            ><button class="text-button" id="clearFilters" hidden>
+              Limpar
+            </button>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>ENTREGA / DESTINO</th>
+                  <th>PRODUTO</th>
+                  <th>PRAZO</th>
+                  <th>STATUS</th>
+                  <th>PRIORIDADE</th>
+                  <th>CUSTO</th>
+                  <th><span class="sr-only">Detalhes</span></th>
+                </tr>
+              </thead>
+              <tbody id="deliveryRows">
+                <tr>
+                  <td colspan="7" class="empty">Carregando entregas…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="tableSummary" aria-live="polite">Aguardando dados</span>
+            <div>
+              <button
+                class="page-button"
+                id="prevPage"
+                aria-label="Página anterior"
+              >
+                ←</button
+              ><span id="pageInfo">1 / 1</span
+              ><button
+                class="page-button"
+                id="nextPage"
+                aria-label="Próxima página"
+              >
+                →
+              </button>
+            </div>
+          </div>
+        </section>
+        <section class="panel carrier-panel" id="carrierPanel" hidden>
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">DESEMPENHO POR PARCEIRO</p>
+              <h2>Transportadoras</h2>
+            </div>
+            <span class="subtle-tag">Base completa</span>
+          </div>
+          <div id="carrierRows"></div>
+          <p class="metric-note">
+            Pontualidade = entregas concluídas até o dia do prazo ÷ entregas
+            concluídas. Custos e unidades excluem cancelamentos. Atraso
+            considera o dia em São Paulo; o prazo vence ao fim do dia.
+          </p>
+        </section>
+        <footer class="page-footer">
+          <span
+            >Logistics Solution <b>v2.0</b> · Desenvolvido por Erivan Santos
+            Marques</span
+          ><span>Gestão logística com decisões orientadas por dados</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="newDialog" class="form-dialog" aria-labelledby="newTitle">
+      <form id="deliveryForm">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">PLANEJAR OPERAÇÃO</p>
+            <h2 id="newTitle">Nova entrega</h2>
+          </div>
+          <button
+            type="button"
+            class="icon-button"
+            data-close="newDialog"
+            aria-label="Fechar cadastro"
+          >
+            ×
+          </button>
+        </div>
+        <p class="muted">
+          Cadastre uma remessa para acompanhar todo o percurso.
+        </p>
+        <div class="form-grid">
+          <label class="full"
+            >Destino<input
+              name="destino"
+              required
+              maxlength="100"
+              placeholder="Ex.: Hospital Aurora" /></label
+          ><label class="full"
+            >Produto / medicamento<input
+              name="medicamento"
+              required
+              maxlength="100"
+              placeholder="Ex.: Soro fisiológico 500 ml" /></label
+          ><label
+            >Lote<input
+              name="lote"
+              required
+              maxlength="40"
+              placeholder="LT-2026-001" /></label
+          ><label
+            >Quantidade (unidades)<input
+              name="quantidade"
+              type="number"
+              min="1"
+              max="1000000"
+              step="1"
+              required /></label
+          ><label class="full"
+            >Transportadora<input
+              name="transportadora"
+              required
+              maxlength="80"
+              placeholder="Nome do parceiro logístico" /></label
+          ><label
+            >Prazo de entrega<input
+              name="prazo"
+              type="date"
+              min="2000-01-01"
+              max="2100-12-31"
+              required /></label
+          ><label
+            >Prioridade<select name="prioridade">
+              <option>Normal</option>
+              <option>Alta</option>
+              <option>Urgente</option>
+            </select></label
+          ><label class="full"
+            >Custo de transporte (R$)<input
+              name="custo"
+              type="number"
+              min="0"
+              max="1000000"
+              step="0.01"
+              required
+              placeholder="0,00"
+          /></label>
+        </div>
+        <p id="formError" class="form-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button type="button" class="secondary" data-close="newDialog">
+            Cancelar</button
+          ><button class="primary" id="saveDelivery">
+            Cadastrar entrega →
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog
+      id="detailDialog"
+      class="detail-dialog"
+      aria-labelledby="detailTitle"
+    >
+      <div id="detailContent"></div>
+    </dialog>
+    <div id="toast" class="toast" role="status" hidden></div>
+  </body>
+</html>
