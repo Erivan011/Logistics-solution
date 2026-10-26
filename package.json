@@ -8,13 +8,11 @@
   },
   "scripts": {
     "start": "node scripts/start-planner.mjs",
-    "test": "npm run test:legacy && npm run test:planner && npm run test:ui",
-    "check": "node --check web-system/frontend/app.js && node --check web-system/backend/server.js",
+    "test": "npm run test:planner && npm run test:ui",
+    "check": "tsc -p planner-ui/tsconfig.json",
     "dev:ui": "vite --config planner-ui/vite.config.ts",
     "build:ui": "tsc -p planner-ui/tsconfig.json && vite build --config planner-ui/vite.config.ts && node scripts/copy-docs-assets.mjs",
     "preview:ui": "vite preview --config planner-ui/vite.config.ts",
-    "start:legacy": "node web-system/backend/server.js",
-    "test:legacy": "node --test web-system/tests/*.test.js",
     "test:planner": "node scripts/test-planner.mjs",
     "test:ui": "node --test planner-ui/tests/*.test.cjs",
     "preview:standalone": "node scripts/build-preview.mjs"

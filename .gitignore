@@ -1,5 +1,4 @@
 node_modules/
-web-system/data/
 *.sqlite*
 .env
 coverage/

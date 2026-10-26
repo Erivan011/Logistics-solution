@@ -2,7 +2,7 @@
 
 **Planejamento de distribuição com restrições, simulação de cenários e resultados auditáveis.**
 
-Projeto de portfólio de **Erivan Santos Marques**. A versão 3.1 acrescenta uma aplicação **Python + FastAPI + OR-Tools** e uma interface **React + TypeScript** ao repositório acadêmico original. O CRUD Node.js da versão 2 foi preservado em `web-system/`.
+Projeto de portfólio de **Erivan Santos Marques**. A versão 3.1 acrescenta uma aplicação **Python + FastAPI + OR-Tools** e uma interface **React + TypeScript** ao repositório acadêmico original.
 
 ## O que o sistema decide
 
@@ -185,9 +185,10 @@ npm test
 
 - `npm run test:planner`: regras de otimização, FEFO, capacidade, refrigeração, janelas, estoque, verificador, comparação exaustiva de um caso pequeno, API, snapshots, conflitos, persistência, baixa por lote, idempotência, rollback e confirmações concorrentes.
 - `npm run test:ui`: React executado em DOM de teste, integrado à API Python real; planejar, editar, simular, comparar, reabrir resultados e confirmar a expedição. Também valida a prévia somente leitura.
-- `npm run test:legacy`: testes preservados da versão 2.
 
 Os testes da interface não substituem inspeção visual em navegadores reais. A abertura da prévia no navegador remoto deste ambiente foi bloqueada pela política de URLs de arquivos; não foi feita validação visual nesse navegador. O TypeScript e o build de produção foram verificados.
+
+Na validação local, **26 testes passaram**: 24 do backend Python e 2 de integração da interface. Um teste de PostgreSQL foi ignorado pela ausência do serviço local.
 
 Um teste opcional usa PostgreSQL quando `POSTGRES_TEST_URL` é definido. O workflow inclui esse serviço para validação no GitHub a cada push e pull request.
 
@@ -206,12 +207,11 @@ planner-ui/tests/            Testes de integração da interface e prévia
 scripts/                    Inicialização, build e exportação de prévia
 tests/planner/              Testes Python
 docs/                       Arquitetura, algoritmo e exemplo reproduzível
-web-system/                 Aplicação Node.js da versão 2, preservada
 ```
 
-Os notebooks e documentos acadêmicos da raiz continuam preservados. Não são executados pelo planejador. A inteligência da v3 é **otimização com restrições**, não um modelo de IA generativa ou machine learning treinado.
+A inteligência desta versão é **otimização com restrições**, não um modelo de IA generativa ou machine learning treinado.
 
-Para abrir a versão 2: `npm run start:legacy` em `http://127.0.0.1:3000`. Sua documentação está em [VERSAO_2.md](docs/VERSAO_2.md).
+A árvore atual contém apenas a aplicação nova. Os arquivos acadêmicos e a versão anterior podem ser consultados no histórico do Git.
 
 ## Para apresentar em entrevista
 
