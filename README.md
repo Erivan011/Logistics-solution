@@ -2,7 +2,7 @@
 
 **Planejamento de distribuição com restrições, simulação de cenários e resultados auditáveis.**
 
-Projeto de portfólio de **Erivan Santos Marques**. -Essa aplicação **Python + FastAPI + OR-Tools** e uma interface **React + TypeScript** ao repositório acadêmico original.
+Projeto de portfólio de **Erivan Santos Marques**. -Essa aplicação em **Python + FastAPI + OR-Tools** e uma interface **React + TypeScript** ao repositório acadêmico original.
 
 ## O que o sistema decide
 
