@@ -23,6 +23,6 @@ databases:
   - name: erivan-logistics-demo-db
     plan: free
     region: oregon
-    databaseName: logistics
-    user: logistics
+    databaseName: erivan_logistics_demo_db
+    user: erivan_logistics_demo_db_user
     ipAllowList: []
