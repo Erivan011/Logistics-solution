@@ -1,4 +1,4 @@
-# Logistics Intelligence · v3.1
+ Logistics Intelligence 
 
 **Planejamento de distribuição com restrições, simulação de cenários e resultados auditáveis.**
 
