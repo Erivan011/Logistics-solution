@@ -84,8 +84,14 @@ def safe_cell(value):
 
 def create_app(database_url=None, *, seed=True, api_token=None):
     if database_url is None:
-        Path("planner/data").mkdir(parents=True, exist_ok=True)
-        database_url = os.getenv("DATABASE_URL", "sqlite:///planner/data/planner.db")
+        database_url = os.getenv("DATABASE_URL")
+        if not database_url:
+            Path("planner/data").mkdir(parents=True, exist_ok=True)
+            database_url = "sqlite:///planner/data/planner.db"
+    # Hosted providers supply PostgreSQL URLs without an explicit driver.
+    # psycopg v3 is installed; SQLAlchemy defaults to psycopg2 otherwise.
+    if database_url.startswith(("postgres://", "postgresql://")):
+        database_url = "postgresql+psycopg://" + database_url.split("://", 1)[1]
     options = {}
     if database_url.startswith("sqlite"):
         options["connect_args"] = {"check_same_thread": False}

@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements-planner.txt && useradd -m -u 1000
 COPY planner ./planner
 COPY --from=ui /build/planner-ui/dist ./planner-ui/dist
 COPY --from=ui /build/planner/static ./planner/static
-ENV DATABASE_URL=sqlite:////data/planner.db
+ENV DATABASE_URL=sqlite:////data/planner.db PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 USER planner
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "planner.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "planner.serve"]
