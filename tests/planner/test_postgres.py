@@ -10,7 +10,11 @@ from planner.api import create_app, Base
     not os.getenv("POSTGRES_TEST_URL"), reason="PostgreSQL de teste não configurado"
 )
 def test_postgres_snapshot_version_and_transaction():
-    app = create_app(os.environ["POSTGRES_TEST_URL"], api_token="")
+    # Render provides a plain PostgreSQL URL, not a SQLAlchemy driver URL.
+    provider_url = os.environ["POSTGRES_TEST_URL"].replace(
+        "postgresql+psycopg://", "postgresql://", 1
+    )
+    app = create_app(provider_url, api_token="")
     try:
         with TestClient(app) as c:
             first = c.get("/api/scenarios").json()["data"][0]

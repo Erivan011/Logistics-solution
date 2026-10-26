@@ -24,6 +24,10 @@ O pacote entregue inclui **`Logistics_Intelligence_Preview.html`**: uma prévia 
 
 A prévia não é um site hospedado. Sua API é substituída por um conjunto explícito de respostas gravadas; tentativas de escrita são recusadas.
 
+## Hospedar online
+
+A aplicação completa pode ser hospedada no Render usando o [Blueprint e o roteiro de publicação](docs/DEPLOY_RENDER.md). A configuração solicita um serviço Docker e um banco PostgreSQL gratuitos. O banco gratuito expira em 30 dias; os limites e o controle de acesso estão documentados no roteiro. A URL funcional só existe depois que o provedor concluir o deploy.
+
 ## Executar localmente
 
 Requisitos testados: **Python 3.12** e **Node.js 24**. A primeira instalação precisa de internet para baixar as dependências. Não usa APIs pagas nem exige chave de IA.
@@ -188,7 +192,7 @@ npm test
 
 Os testes da interface não substituem inspeção visual em navegadores reais. A abertura da prévia no navegador remoto deste ambiente foi bloqueada pela política de URLs de arquivos; não foi feita validação visual nesse navegador. O TypeScript e o build de produção foram verificados.
 
-Na validação local, **26 testes passaram**: 24 do backend Python e 2 de integração da interface. Um teste de PostgreSQL foi ignorado pela ausência do serviço local.
+Na validação local, **28 testes passaram**: 26 do backend Python e 2 de integração da interface. Um teste de PostgreSQL foi ignorado pela ausência do serviço local.
 
 Um teste opcional usa PostgreSQL quando `POSTGRES_TEST_URL` é definido. O workflow inclui esse serviço para validação no GitHub a cada push e pull request.
 
