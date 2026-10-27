@@ -222,7 +222,3 @@ scripts/                    Inicialização, build e exportação de prévia
 tests/planner/              Testes Python
 docs/                       Arquitetura, algoritmo e exemplo reproduzível
 ```
-
-A inteligência desta versão é **otimização com restrições**, não um modelo de IA generativa ou machine learning treinado.
-
-A árvore atual contém apenas a aplicação nova. Os arquivos acadêmicos e a versão anterior podem ser consultados no histórico do Git.
