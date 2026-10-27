@@ -1,8 +1,10 @@
-Logistics Intelligence
+# RoutePlan
 
-**Planejamento de distribuição com restrições, simulação de cenários e resultados auditáveis.**
+**Planejamento e Otimização Logística**
 
-Projeto de portfólio de **Erivan Santos Marques**. -Essa aplicação em **Python + FastAPI + OR-Tools** e uma interface **React + TypeScript** ao repositório acadêmico original.
+Planejamento de distribuição com restrições, simulação de cenários e resultados auditáveis.
+
+Projeto de portfólio de **Erivan Santos Marques**, iniciado em um dos primeiros trabalhos da faculdade de Análise e Desenvolvimento de Sistemas. A proposta básica de análise e planejamento logístico evoluiu para uma aplicação em **Python + FastAPI + OR-Tools**, com interface em **React + TypeScript**.
 
 ## O que o sistema decide
 
@@ -20,7 +22,7 @@ O planejamento respeita **janelas de chegada, turno dos veículos, capacidade em
 
 ## Visite a demonstração
 
-**[Abrir Logistics Intelligence online](https://erivan-logistics-intelligence.onrender.com/)** — não exige cadastro nem token para visitantes.
+**[Abrir RoutePlan online](https://erivan-logistics-intelligence.onrender.com/)** — não exige cadastro nem token para visitantes.
 
 A demonstração pública apresenta um plano registrado do solver, com dados fictícios de 26/10/2026. Explore rotas, filtre pedidos, inspecione estoque/frota e baixe CSV ou JSON. Ela é somente leitura: não executa novos cálculos nem altera a operação. O botão **Acesso administrativo** permite ao responsável informar seu token para cadastrar, editar, recalcular e registrar expedições.
 

@@ -122,7 +122,7 @@ def create_app(database_url=None, *, seed=True, api_token=None):
         engine.dispose()
 
     app = FastAPI(
-        title="Logistics Intelligence API",
+        title="RoutePlan API",
         version="3.1.0",
         lifespan=lifespan,
         description="Simulação logística com VRPTW, FEFO e cenários versionados. Dados demonstrativos; distâncias estimadas.",
@@ -596,7 +596,7 @@ def create_app(database_url=None, *, seed=True, api_token=None):
         def docs():
             return get_swagger_ui_html(
                 openapi_url="/openapi.json",
-                title="Logistics Intelligence API",
+                title="RoutePlan API",
                 swagger_js_url="/api-docs/assets/swagger-ui-bundle.js",
                 swagger_css_url="/api-docs/assets/swagger-ui.css",
                 swagger_favicon_url="",

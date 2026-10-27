@@ -1,4 +1,11 @@
 import {
+  formatCurrency,
+  formatNumber,
+  formatDistance,
+  formatPlanningTime,
+  priorityLabels,
+} from "./formatters";
+import {
   useEffect,
   useMemo,
   useState,
@@ -45,7 +52,7 @@ import type {
   Metrics,
   Dispatch,
 } from "./types";
-const COLORS = [
+const routeColors = [
   "#228578",
   "#c88a48",
   "#707cc4",
@@ -57,16 +64,6 @@ const COLORS = [
   "#619fa2",
   "#8e8a68",
 ];
-const BRL = (cents: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-    cents / 100,
-  );
-const NUM = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
-const KM = (m: number) =>
-  (m / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " km";
-const HOUR = (min: number) =>
-  `${String(8 + Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
-const PRIORITY = { urgent: "Urgente", high: "Alta", normal: "Normal" };
 function parseError(data: unknown): string {
   const d = data as {
     detail?: string | { loc: (string | number)[]; msg: string }[];
@@ -79,6 +76,33 @@ function parseError(data: unknown): string {
           .join("\n")
       : "Não foi possível concluir a operação.";
 }
+const PAGE_HEADINGS: Record<string, { title: string; description: string }> = {
+  overview: {
+    title: "Planejamento de distribuição",
+    description:
+      "Pedidos atendidos, custos e utilização da frota no plano selecionado.",
+  },
+  orders: {
+    title: "Pedidos de entrega",
+    description: "Consulte quantidades, prioridades e janelas de atendimento.",
+  },
+  inventory: {
+    title: "Estoque e frota",
+    description:
+      "Lotes disponíveis, validade dos produtos e capacidade dos veículos.",
+  },
+  dispatches: {
+    title: "Registro de expedições",
+    description:
+      "Consulte pedidos expedidos e movimentações de estoque por lote.",
+  },
+  history: {
+    title: "Cenários e histórico",
+    description:
+      "Simule alternativas e compare os resultados sem alterar o cenário original.",
+  },
+};
+
 function App() {
   const [records, setRecords] = useState<ScenarioRecord[]>([]),
     [selectedId, setSelectedId] = useState(""),
@@ -112,6 +136,7 @@ function App() {
       extraCold: false,
     }),
     [searchStatus, setSearchStatus] = useState("all");
+  const pageHeading = PAGE_HEADINGS[tab] ?? PAGE_HEADINGS.overview;
   const [dispatchRecords, setDispatchRecords] = useState<Dispatch[]>([]);
   const [dispatchKey, setDispatchKey] = useState("");
   const [expandedDispatch, setExpandedDispatch] = useState<string | null>(null);
@@ -565,7 +590,7 @@ function App() {
       setNotice(
         value.replayed
           ? "Confirmação anterior recuperada. Nenhuma baixa foi repetida."
-          : `Expedição registrada: ${value.dispatch.order_count} pedidos e ${NUM(value.dispatch.unit_count)} unidades.`,
+          : `Expedição registrada: ${value.dispatch.order_count} pedidos e ${formatNumber(value.dispatch.unit_count)} unidades.`,
       );
     } catch (e) {
       setModalError((e as Error).message);
@@ -582,8 +607,8 @@ function App() {
         <div className="logo-icon">
           <Layers3 size={25} />
         </div>
-        <h1>Logistics Intelligence</h1>
-        <p>Carregando sua central de planejamento…</p>
+        <h1>RoutePlan</h1>
+        <p>Carregando o planejamento…</p>
       </div>
     );
   return (
@@ -597,7 +622,7 @@ function App() {
             <Layers3 size={24} />
           </div>
           <div>
-            logistics<span>INTELLIGENCE</span>
+            RoutePlan<span>Planejamento e Otimização Logística</span>
           </div>
         </a>
         <div className="workspace-label">
@@ -635,13 +660,17 @@ function App() {
         </nav>
         <div className="sidebar-foot">
           <div className="solver-status">
-            <i /> Motor de otimização disponível
-            <small>OR-Tools · Restrições verificadas</small>
+            <i /> Plano disponível para consulta{!publicDemo && " e edição"}
+            <small>
+              {publicDemo
+                ? "Resultado de uma execução registrada"
+                : "OR-Tools · Restrições verificadas"}
+            </small>
           </div>
           <div className="profile">
             <span className="avatar">ES</span>
             <div>
-              Erivan Santos<small>Portfólio de engenharia</small>
+              Erivan Santos<small>Projeto de portfólio</small>
             </div>
             <button
               aria-label="Configurar acesso"
@@ -658,12 +687,12 @@ function App() {
       <div className="main-shell">
         <header className="topbar">
           <div className="crumb">
-            Workspace <ChevronRight size={12} />
+            RoutePlan <ChevronRight size={12} />
             <strong>Planejamento logístico</strong>
           </div>
           <div className="topbar-right">
             <span className="demo-tag">
-              <i /> DADOS SINTÉTICOS
+              <i /> DADOS FICTÍCIOS
             </span>
             <span className="date-top">
               {scenario?.planning_date.split("-").reverse().join("/")}
@@ -678,16 +707,13 @@ function App() {
               aria-label="Demonstração pública"
             >
               <div>
-                <span className="eyebrow">
-                  DEMONSTRAÇÃO PÚBLICA · SEM CADASTRO
-                </span>
-                <h2>Explore uma operação planejada.</h2>
+                <span className="eyebrow">DEMONSTRAÇÃO</span>
+                <h2>Plano de distribuição · São Paulo</h2>
                 <p>
-                  Dados fictícios e resultado registrado em{" "}
+                  Plano calculado com dados fictícios em{" "}
                   {scenario?.planning_date.split("-").reverse().join("/")}.
-                  Navegue pelas rotas, filtre pedidos, confira lotes FEFO e
-                  exporte o plano. Edição, novos cálculos e expedição exigem
-                  acesso administrativo.
+                  Consulte as rotas, os pedidos e a separação dos lotes. Esta
+                  demonstração é somente leitura.
                 </p>
               </div>
               <div className="public-demo-links">
@@ -709,34 +735,9 @@ function App() {
           )}
           <div className="page-heading">
             <div>
-              <p className="eyebrow">LOGÍSTICA QUE PENSA À FRENTE</p>
-              <h1>
-                {tab === "overview" ? (
-                  <>
-                    Menos incerteza.
-                    <br className="mobile-br" /> Mais <span>inteligência.</span>
-                  </>
-                ) : tab === "orders" ? (
-                  "Cada pedido, uma prioridade."
-                ) : tab === "inventory" ? (
-                  "Os recursos por trás da operação."
-                ) : tab === "dispatches" ? (
-                  "Cada baixa, um registro."
-                ) : (
-                  "Experimente. Compare. Decida."
-                )}
-              </h1>
-              <p className="subtitle">
-                {tab === "overview"
-                  ? "Planeje rotas, proteja o estoque e encontre o melhor uso da sua frota."
-                  : tab === "orders"
-                    ? "Janelas de atendimento, quantidades e prioridades em um só lugar."
-                    : tab === "inventory"
-                      ? "Lotes, validade, refrigeração e capacidade de transporte."
-                      : tab === "dispatches"
-                        ? "Baixas por lote, pedidos expedidos e histórico de confirmação."
-                        : "Simulações preservam o cenário original e ficam salvas para comparação."}
-              </p>
+              <p className="eyebrow">OPERAÇÃO SÃO PAULO</p>
+              <h1>{pageHeading.title}</h1>
+              <p className="subtitle">{pageHeading.description}</p>
             </div>
             <div className="heading-actions">
               <button
@@ -873,11 +874,11 @@ function App() {
                 />
                 <Metric
                   title="Custo estimado do plano"
-                  value={metrics ? BRL(metrics.cost_cents) : "—"}
+                  value={metrics ? formatCurrency(metrics.cost_cents) : "—"}
                   icon={<Wallet size={18} />}
                   foot={
                     run
-                      ? `Referência simples: ${BRL(run.result.baseline.metrics.cost_cents)}`
+                      ? `Referência simples: ${formatCurrency(run.result.baseline.metrics.cost_cents)}`
                       : "Calcule o plano para comparar custos"
                   }
                   positive={
@@ -895,7 +896,7 @@ function App() {
                   icon={<Truck size={18} />}
                   foot={
                     metrics
-                      ? `${metrics.vehicles_used} veículos · ${KM(metrics.distance_m)}`
+                      ? `${metrics.vehicles_used} veículos · ${formatDistance(metrics.distance_m)}`
                       : `${scenario.vehicles.length} veículos · ${scenario.vehicles.reduce((n, v) => n + v.capacity_kg, 0)} kg disponíveis`
                   }
                 />
@@ -969,7 +970,8 @@ function App() {
                             >
                               <i
                                 style={{
-                                  background: COLORS[i % COLORS.length],
+                                  background:
+                                    routeColors[i % routeColors.length],
                                 }}
                               />
                               {r.vehicle_id}
@@ -1007,9 +1009,10 @@ function App() {
                                 <span
                                   className="truck-symbol"
                                   style={{
-                                    color: COLORS[i % COLORS.length],
+                                    color: routeColors[i % routeColors.length],
                                     background:
-                                      COLORS[i % COLORS.length] + "12",
+                                      routeColors[i % routeColors.length] +
+                                      "12",
                                   }}
                                 >
                                   <Truck size={18} />
@@ -1025,15 +1028,15 @@ function App() {
                               </div>
                               <div className="route-stats">
                                 <span>
-                                  {KM(r.distance_m)}
+                                  {formatDistance(r.distance_m)}
                                   <small>Distância estimada</small>
                                 </span>
                                 <span>
-                                  {BRL(r.cost_cents)}
+                                  {formatCurrency(r.cost_cents)}
                                   <small>Custo da rota</small>
                                 </span>
                                 <span>
-                                  {HOUR(r.end_min)}
+                                  {formatPlanningTime(r.end_min)}
                                   <small>Retorno previsto</small>
                                 </span>
                               </div>
@@ -1050,7 +1053,8 @@ function App() {
                                 <i
                                   style={{
                                     width: `${(r.load_g / r.capacity_g) * 100}%`,
-                                    background: COLORS[i % COLORS.length],
+                                    background:
+                                      routeColors[i % routeColors.length],
                                   }}
                                 />
                               </div>
@@ -1083,15 +1087,15 @@ function App() {
                         </span>
                         <h3>{selectedOrder.destination}</h3>
                         <p>
-                          {PRIORITY[selectedOrder.priority]} ·{" "}
-                          {HOUR(selectedOrder.window_start)}–
-                          {HOUR(selectedOrder.window_end)} ·{" "}
+                          {priorityLabels[selectedOrder.priority]} ·{" "}
+                          {formatPlanningTime(selectedOrder.window_start)}–
+                          {formatPlanningTime(selectedOrder.window_end)} ·{" "}
                           {selectedOrder.quantity} unidades
                         </p>
                       </div>
                       <span>
                         {selectedOrderRoute
-                          ? `${selectedOrderRoute.vehicle_name} · chegada ${HOUR(selectedOrderRoute.stops.find((s) => s.order_id === activeOrder)!.arrival_min)}`
+                          ? `${selectedOrderRoute.vehicle_name} · chegada ${formatPlanningTime(selectedOrderRoute.stops.find((s) => s.order_id === activeOrder)!.arrival_min)}`
                           : run
                             ? "Pedido não alocado"
                             : "Aguardando planejamento"}
@@ -1143,7 +1147,7 @@ function App() {
                         </h3>
                         <p>
                           {expired
-                            ? `${NUM(expired)} unidades vencidas excluídas do planejamento.`
+                            ? `${formatNumber(expired)} unidades vencidas excluídas do planejamento.`
                             : "Lotes válidos ordenados pela data de vencimento."}
                         </p>
                       </div>
@@ -1176,13 +1180,17 @@ function App() {
                           ],
                           [
                             "Distância estimada",
-                            KM(run.result.baseline.metrics.distance_m),
-                            KM(metrics!.distance_m),
+                            formatDistance(
+                              run.result.baseline.metrics.distance_m,
+                            ),
+                            formatDistance(metrics!.distance_m),
                           ],
                           [
                             "Custo de transporte",
-                            BRL(run.result.baseline.metrics.cost_cents),
-                            BRL(metrics!.cost_cents),
+                            formatCurrency(
+                              run.result.baseline.metrics.cost_cents,
+                            ),
+                            formatCurrency(metrics!.cost_cents),
                           ],
                           [
                             "Urgentes atendidos",
@@ -1308,7 +1316,7 @@ function App() {
                                     )?.name
                                   }
                                   <small>
-                                    {NUM(o.quantity)} unidades
+                                    {formatNumber(o.quantity)} unidades
                                     {scenario.products.find(
                                       (p) => p.id === o.product_id,
                                     )?.refrigerated
@@ -1317,11 +1325,12 @@ function App() {
                                   </small>
                                 </td>
                                 <td>
-                                  {HOUR(o.window_start)}–{HOUR(o.window_end)}
+                                  {formatPlanningTime(o.window_start)}–
+                                  {formatPlanningTime(o.window_end)}
                                 </td>
                                 <td>
                                   <span className={`priority ${o.priority}`}>
-                                    {PRIORITY[o.priority]}
+                                    {priorityLabels[o.priority]}
                                   </span>
                                 </td>
                                 <td>
@@ -1335,7 +1344,11 @@ function App() {
                                         : "A planejar"}
                                   </span>
                                 </td>
-                                <td>{stop ? HOUR(stop.arrival_min) : "—"}</td>
+                                <td>
+                                  {stop
+                                    ? formatPlanningTime(stop.arrival_min)
+                                    : "—"}
+                                </td>
                               </tr>
                             );
                           })}
@@ -1392,7 +1405,11 @@ function App() {
                           <p>{o.reason}</p>
                         </div>
                         <span className={`priority ${o.priority}`}>
-                          {PRIORITY[o.priority as keyof typeof PRIORITY]}
+                          {
+                            priorityLabels[
+                              o.priority as keyof typeof priorityLabels
+                            ]
+                          }
                         </span>
                       </div>
                     ))}
@@ -1436,18 +1453,19 @@ function App() {
                           </div>
                           <h3>{p.name}</h3>
                           <strong>
-                            {NUM(p.valid)} <small>unidades válidas</small>
+                            {formatNumber(p.valid)}{" "}
+                            <small>unidades válidas</small>
                           </strong>
                           <div className="stock-demand">
-                            Demanda: {NUM(p.demand)} un.
+                            Demanda: {formatNumber(p.demand)} un.
                             <span
                               className={
                                 p.demand > p.valid ? "negative" : "positive"
                               }
                             >
                               {p.demand > p.valid
-                                ? `Déficit de ${NUM(p.demand - p.valid)}`
-                                : `Saldo de ${NUM(p.valid - p.demand)}`}
+                                ? `Déficit de ${formatNumber(p.demand - p.valid)}`
+                                : `Saldo de ${formatNumber(p.valid - p.demand)}`}
                             </span>
                           </div>
                         </article>
@@ -1506,8 +1524,12 @@ function App() {
                                       .reverse()
                                       .join("/")}
                                   </td>
-                                  <td>{NUM(b.quantity)} un.</td>
-                                  <td>{run ? `${NUM(allocated)} un.` : "—"}</td>
+                                  <td>{formatNumber(b.quantity)} un.</td>
+                                  <td>
+                                    {run
+                                      ? `${formatNumber(allocated)} un.`
+                                      : "—"}
+                                  </td>
                                   <td>
                                     <span
                                       className={`status-tag ${expired ? "unserved" : "served"}`}
@@ -1548,7 +1570,7 @@ function App() {
                         <article key={v.id}>
                           <span
                             className="truck-symbol"
-                            style={{ color: COLORS[i % 10] }}
+                            style={{ color: routeColors[i % 10] }}
                           >
                             <Truck size={23} />
                           </span>
@@ -1564,16 +1586,17 @@ function App() {
                             <div>
                               <dt>Turno</dt>
                               <dd>
-                                {HOUR(v.shift_start)}–{HOUR(v.shift_end)}
+                                {formatPlanningTime(v.shift_start)}–
+                                {formatPlanningTime(v.shift_end)}
                               </dd>
                             </div>
                             <div>
                               <dt>Por km</dt>
-                              <dd>{BRL(v.cost_per_km_cents)}</dd>
+                              <dd>{formatCurrency(v.cost_per_km_cents)}</dd>
                             </div>
                             <div>
                               <dt>Ativação</dt>
-                              <dd>{BRL(v.fixed_cost_cents)}</dd>
+                              <dd>{formatCurrency(v.fixed_cost_cents)}</dd>
                             </div>
                           </dl>
                         </article>
@@ -1692,8 +1715,8 @@ function App() {
                               <td>
                                 {r.metrics.served}/{r.metrics.total_orders}
                               </td>
-                              <td>{BRL(r.metrics.cost_cents)}</td>
-                              <td>{KM(r.metrics.distance_m)}</td>
+                              <td>{formatCurrency(r.metrics.cost_cents)}</td>
+                              <td>{formatDistance(r.metrics.distance_m)}</td>
                               <td>{r.metrics.vehicles_used}</td>
                               <td>
                                 <button
@@ -1771,9 +1794,9 @@ function App() {
                                 {comparisonRuns.map((r) => (
                                   <td key={r.id}>
                                     {key === "cost_cents"
-                                      ? BRL(r.metrics[key])
+                                      ? formatCurrency(r.metrics[key])
                                       : key === "distance_m"
-                                        ? KM(r.metrics[key])
+                                        ? formatDistance(r.metrics[key])
                                         : key === "utilization_pct"
                                           ? r.metrics[key] + "%"
                                           : r.metrics[key]}
@@ -1832,7 +1855,7 @@ function App() {
                           </div>
                           <span>
                             {d.order_count} pedidos
-                            <small>{NUM(d.unit_count)} unidades</small>
+                            <small>{formatNumber(d.unit_count)} unidades</small>
                           </span>
                           <ChevronDown size={17} />
                         </button>
@@ -1847,7 +1870,9 @@ function App() {
                                 movimentados
                               </span>
                               <span>
-                                <strong>{BRL(d.metrics.cost_cents)}</strong>{" "}
+                                <strong>
+                                  {formatCurrency(d.metrics.cost_cents)}
+                                </strong>{" "}
                                 custo estimado do plano
                               </span>
                             </div>
@@ -1868,11 +1893,11 @@ function App() {
                                       <td>
                                         <strong>{m.batch_id}</strong>
                                       </td>
-                                      <td>{NUM(m.before)}</td>
+                                      <td>{formatNumber(m.before)}</td>
                                       <td className="movement-quantity">
-                                        −{NUM(m.quantity)}
+                                        −{formatNumber(m.quantity)}
                                       </td>
-                                      <td>{NUM(m.after)}</td>
+                                      <td>{formatNumber(m.after)}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -1884,7 +1909,7 @@ function App() {
                                 <span key={o.id}>
                                   <Check size={12} />
                                   <strong>{o.id}</strong> {o.destination} ·{" "}
-                                  {NUM(o.quantity)} un.
+                                  {formatNumber(o.quantity)} un.
                                 </span>
                               ))}
                             </div>
@@ -1979,9 +2004,9 @@ function App() {
           )}
           <footer>
             <span>
-              Logistics Intelligence <b>v3.1</b> · Erivan Santos Marques
+              RoutePlan <b>v3.1</b> · Erivan Santos Marques
             </span>
-            <span>Engenharia de software · Pesquisa operacional · Dados</span>
+            <span>Planejamento e Otimização Logística</span>
           </footer>
         </main>
       </div>
@@ -2043,7 +2068,7 @@ function App() {
                   <div>
                     <span>Unidades a baixar</span>
                     <strong>
-                      {NUM(
+                      {formatNumber(
                         run.result.allocations.reduce(
                           (n, a) => n + a.quantity,
                           0,
@@ -2303,7 +2328,7 @@ function App() {
                                 "VEÍCULO",
                                 "CAPACIDADE KG",
                                 "REFRIGERADO",
-                                "R$/KM",
+                                "R$/formatDistance",
                                 "TURNO ATÉ (MIN)",
                               ]
                         ).map((label) => (
@@ -2405,7 +2430,9 @@ function App() {
                                     )
                                   }
                                 />
-                                <small>{HOUR(o.window_start)}</small>
+                                <small>
+                                  {formatPlanningTime(o.window_start)}
+                                </small>
                               </td>
                               <td>
                                 <input
@@ -2424,7 +2451,9 @@ function App() {
                                     )
                                   }
                                 />
-                                <small>{HOUR(o.window_end)}</small>
+                                <small>
+                                  {formatPlanningTime(o.window_end)}
+                                </small>
                               </td>
                               <td>
                                 <input
@@ -2610,7 +2639,9 @@ function App() {
                                       )
                                     }
                                   />
-                                  <small>{HOUR(v.shift_end)}</small>
+                                  <small>
+                                    {formatPlanningTime(v.shift_end)}
+                                  </small>
                                 </td>
                               </tr>
                             ))}
@@ -2817,7 +2848,7 @@ function RouteMap({
               <polyline
                 points={coordinates.map((p) => p.join(",")).join(" ")}
                 fill="none"
-                stroke={COLORS[i % 10]}
+                stroke={routeColors[i % 10]}
                 strokeWidth="2.7"
                 strokeLinejoin="round"
                 strokeDasharray="6 3"
@@ -2831,7 +2862,7 @@ function RouteMap({
               r.stops.some((s) => s.order_id === order.id),
             ),
             route = routes[routeIndex],
-            color = routeIndex >= 0 ? COLORS[routeIndex % 10] : "#94a49a",
+            color = routeIndex >= 0 ? routeColors[routeIndex % 10] : "#94a49a",
             selected = selectedOrder === order.id;
           return (
             <g

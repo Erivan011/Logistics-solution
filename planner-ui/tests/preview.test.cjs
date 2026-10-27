@@ -47,7 +47,7 @@ test("standalone preview renders recorded solver output and rejects mutations", 
   );
   assert.equal(optimize.disabled, true);
   assert.equal($("[role=dialog]"), null);
-  assert.match($(".public-demo-banner").textContent, /SEM CADASTRO/);
+  assert.match($(".public-demo-banner").textContent, /DEMONSTRAÇÃO/);
   const denied = await dom.window.fetch("/api/scenarios", { method: "POST" });
   assert.equal(denied.status, 403);
 });
