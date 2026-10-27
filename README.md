@@ -1,4 +1,4 @@
- Logistics Intelligence 
+Logistics Intelligence
 
 **Planejamento de distribuição com restrições, simulação de cenários e resultados auditáveis.**
 
@@ -18,11 +18,17 @@ O planejamento respeita **janelas de chegada, turno dos veículos, capacidade em
 
 **É uma aplicação demonstrativa, não uma plataforma pronta para operar medicamentos ou dados reais de pacientes.** O modelo não inclui trânsito real, geocodificação, sensores, validação sanitária, múltiplos depósitos, devoluções ou reabastecimento em rota.
 
-## Veja sem instalar
+## Visite a demonstração
 
-O pacote entregue inclui **`Logistics_Intelligence_Preview.html`**: uma prévia navegável, somente leitura, que mostra o resultado registrado de uma execução real do otimizador sobre dados fictícios. Abra o arquivo no navegador. Para cadastrar, editar e recalcular cenários, execute a aplicação completa abaixo.
+**[Abrir Logistics Intelligence online](https://erivan-logistics-intelligence.onrender.com/)** — não exige cadastro nem token para visitantes.
 
-A prévia não é um site hospedado. Sua API é substituída por um conjunto explícito de respostas gravadas; tentativas de escrita são recusadas.
+A demonstração pública apresenta um plano registrado do solver, com dados fictícios de 26/10/2026. Explore rotas, filtre pedidos, inspecione estoque/frota e baixe CSV ou JSON. Ela é somente leitura: não executa novos cálculos nem altera a operação. O botão **Acesso administrativo** permite ao responsável informar seu token para cadastrar, editar, recalcular e registrar expedições.
+
+O resultado público vem de `docs/demo-result.json`, separado do banco de operação. Nenhuma consulta pública lê cenários particulares, histórico administrativo ou estoque atual. A chave administrativa não deve ser compartilhada com visitantes.
+
+A hospedagem usa Render Free, que pode demorar cerca de um minuto para iniciar após ficar sem uso. O PostgreSQL gratuito atual expira em **25/11/2026**; é necessário migrá-lo antes dessa data para continuidade da operação.
+
+Também é possível gerar uma prévia HTML somente leitura com `npm run preview:standalone`.
 
 ## Hospedar online
 
@@ -161,6 +167,8 @@ O serviço web fica vinculado a `127.0.0.1:8000`; o banco não expõe porta no h
 
 | Método | Rota                        | Finalidade                                                    |
 | ------ | --------------------------- | ------------------------------------------------------------- |
+| GET    | `/api/demo`                 | Plano público fixo, fictício e somente leitura                |
+| GET    | `/api/demo/export.csv`      | CSV do plano público                                          |
 | GET    | `/api/scenarios`            | Cenários e versões atuais                                     |
 | POST   | `/api/scenarios`            | Criar um cenário validado                                     |
 | PUT    | `/api/scenarios/{id}`       | Editar com `expected_version`; conflito retorna 409           |
@@ -192,7 +200,7 @@ npm test
 
 Os testes da interface não substituem inspeção visual em navegadores reais. A abertura da prévia no navegador remoto deste ambiente foi bloqueada pela política de URLs de arquivos; não foi feita validação visual nesse navegador. O TypeScript e o build de produção foram verificados.
 
-Na validação local, **28 testes passaram**: 26 do backend Python e 2 de integração da interface. Um teste de PostgreSQL foi ignorado pela ausência do serviço local.
+Na validação local, **30 testes passaram**: 28 do backend Python e 2 de integração da interface. Um teste de PostgreSQL foi ignorado pela ausência do serviço local.
 
 Um teste opcional usa PostgreSQL quando `POSTGRES_TEST_URL` é definido. O workflow inclui esse serviço para validação no GitHub a cada push e pull request.
 

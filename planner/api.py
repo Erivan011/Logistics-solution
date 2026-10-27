@@ -2,6 +2,8 @@
 
 import csv
 import io
+import json
+from types import SimpleNamespace
 import os
 import secrets
 from contextlib import asynccontextmanager
@@ -203,6 +205,24 @@ def create_app(database_url=None, *, seed=True, api_token=None):
             "version": "3.1.0",
             "authentication_required": bool(token),
         }
+
+    def public_demo_run():
+        bundled = Path(__file__).resolve().parent / "public_demo.json"
+        source = (
+            bundled
+            if bundled.is_file()
+            else Path(__file__).resolve().parents[1] / "docs" / "demo-result.json"
+        )
+        return json.loads(source.read_text(encoding="utf-8"))
+
+    @app.get("/api/demo")
+    def public_demo():
+        # Publish only the fixed synthetic artifact, never the operation database.
+        return {"data": public_demo_run()}
+
+    @app.get("/api/demo/export.csv")
+    def public_demo_csv():
+        return csv_response(SimpleNamespace(**public_demo_run()))
 
     @app.get("/api/scenarios", dependencies=[Depends(guard)])
     def scenarios(session: Session = Depends(session_dependency)):
@@ -499,6 +519,9 @@ def create_app(database_url=None, *, seed=True, api_token=None):
         run = session.get(RunRecord, id)
         if not run:
             raise HTTPException(404, "Execução não encontrada.")
+        return csv_response(run)
+
+    def csv_response(run):
         stream = io.StringIO(newline="")
         writer = csv.writer(stream, delimiter=";")
         writer.writerow(

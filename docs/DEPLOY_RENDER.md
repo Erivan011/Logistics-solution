@@ -12,7 +12,7 @@ Este repositório inclui um Blueprint `render.yaml` para executar a interface Re
 
 O Render fornece `PORT`; o processo escuta em `0.0.0.0` nessa porta. As URLs `postgres://` e `postgresql://` fornecidas pelo provedor usam automaticamente o driver psycopg v3. Não substitua o banco por SQLite local em um serviço gratuito: esse sistema de arquivos é efêmero.
 
-A URL da interface é pública, mas a consulta e a alteração dos dados exigem o token compartilhado. Este modelo é apropriado apenas para uma demonstração controlada. Compartilhar o token também concede acesso de escrita; ainda não há conta por visitante nem modo público com isolamento individual. Os dados semeados são fictícios.
+A demonstração é pública e somente leitura, sem token. O resultado vem de um arquivo fictício fixo; não lê o banco da operação. Consultar e alterar os dados administrativos exige o token compartilhado. Este modelo é apropriado apenas para uma demonstração controlada. Compartilhar o token também concede acesso de escrita; ainda não há conta por visitante nem modo público com isolamento individual. Os dados semeados são fictícios.
 
 ## Limites da opção gratuita
 

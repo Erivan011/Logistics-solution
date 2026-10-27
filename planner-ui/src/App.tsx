@@ -99,6 +99,7 @@ function App() {
     [editTab, setEditTab] = useState("orders"),
     [saving, setSaving] = useState(false),
     [modalError, setModalError] = useState("");
+  const [publicDemo, setPublicDemo] = useState(false);
   const [token, setToken] = useState(""),
     [authInput, setAuthInput] = useState(""),
     [compare, setCompare] = useState<string[]>([]),
@@ -119,6 +120,11 @@ function App() {
   const routes = run?.result.plan.routes ?? [],
     metrics = run?.result.plan.metrics;
   async function api<T>(url: string, options: RequestInit = {}): Promise<T> {
+    if (publicDemo && options.method && options.method !== "GET") {
+      throw new Error(
+        "A demonstração pública é somente leitura. Use o acesso administrativo para alterar a operação.",
+      );
+    }
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -139,11 +145,50 @@ function App() {
     setLoading(true);
     setError("");
     try {
+      if (!token) {
+        const healthResponse = await fetch("/api/health");
+        if (!healthResponse.ok)
+          throw new Error("Não foi possível verificar o acesso ao servidor.");
+        const health: { authentication_required: boolean } =
+          await healthResponse.json();
+        if (health.authentication_required) {
+          const demo = await api<Run>("/api/demo");
+          setPublicDemo(true);
+          setRecords([
+            {
+              id: demo.scenario_id,
+              version: demo.scenario_version,
+              updated_at: demo.created_at,
+              scenario: demo.scenario_snapshot,
+            },
+          ]);
+          setSelectedId(demo.scenario_id);
+          setRun(demo);
+          setHistory([
+            {
+              id: demo.id,
+              scenario_id: demo.scenario_id,
+              scenario_version: demo.scenario_version,
+              created_at: demo.created_at,
+              name: demo.scenario_snapshot.name,
+              metrics: demo.result.plan.metrics,
+            },
+          ]);
+          setAllRuns({ [demo.id]: demo });
+          setDispatchRecords([]);
+          return;
+        }
+      }
       const [items, runs, dispatchList] = await Promise.all([
         api<ScenarioRecord[]>("/api/scenarios"),
         api<RunSummary[]>("/api/runs"),
         api<Dispatch[]>("/api/dispatches"),
       ]);
+      if (publicDemo) {
+        setRun(null);
+        setAllRuns({});
+      }
+      setPublicDemo(false);
       setRecords(items);
       setHistory(runs);
       setDispatchRecords(dispatchList);
@@ -203,7 +248,7 @@ function App() {
     };
   }, [modal, saving]);
   async function plan(record = selected) {
-    if (!record) return;
+    if (!record || publicDemo) return;
     setSolving(true);
     setError("");
     setActiveRoute(null);
@@ -248,7 +293,7 @@ function App() {
     }
   }
   function openEditor() {
-    if (!selected) return;
+    if (!selected || publicDemo) return;
     setDraft(structuredClone(selected.scenario));
     setEditTab("orders");
     setModalError("");
@@ -332,9 +377,14 @@ function App() {
     try {
       let blob: Blob;
       if (kind === "csv") {
-        const response = await fetch(`/api/runs/${run.id}/export.csv`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const response = await fetch(
+          publicDemo
+            ? "/api/demo/export.csv"
+            : `/api/runs/${run.id}/export.csv`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          },
+        );
         if (!response.ok) throw new Error("Falha na exportação.");
         blob = await response.blob();
       } else
@@ -467,7 +517,8 @@ function App() {
     run && dispatchRecords.some((d) => d.run_id === run.id),
   );
   const canDispatch = Boolean(
-    run &&
+    !publicDemo &&
+      run &&
       selected &&
       run.scenario_id === selected.id &&
       run.scenario_version === selected.version &&
@@ -621,6 +672,41 @@ function App() {
           </div>
         </header>
         <main id="content">
+          {publicDemo && (
+            <section
+              className="public-demo-banner"
+              aria-label="Demonstração pública"
+            >
+              <div>
+                <span className="eyebrow">
+                  DEMONSTRAÇÃO PÚBLICA · SEM CADASTRO
+                </span>
+                <h2>Explore uma operação planejada.</h2>
+                <p>
+                  Dados fictícios e resultado registrado em{" "}
+                  {scenario?.planning_date.split("-").reverse().join("/")}.
+                  Navegue pelas rotas, filtre pedidos, confira lotes FEFO e
+                  exporte o plano. Edição, novos cálculos e expedição exigem
+                  acesso administrativo.
+                </p>
+              </div>
+              <div className="public-demo-links">
+                <a
+                  href="https://github.com/Erivan011/Logistics-solution"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Ver código no GitHub <ArrowUpRight size={14} />
+                </a>
+                <button
+                  className="text-button"
+                  onClick={() => setModal("auth")}
+                >
+                  <ShieldCheck size={14} /> Acesso administrativo
+                </button>
+              </div>
+            </section>
+          )}
           <div className="page-heading">
             <div>
               <p className="eyebrow">LOGÍSTICA QUE PENSA À FRENTE</p>
@@ -668,13 +754,13 @@ function App() {
                     setModal("simulate");
                   }
                 }}
-                disabled={!selected || solving}
+                disabled={publicDemo || !selected || solving}
               >
                 <FlaskConical size={15} /> Simular cenário
               </button>
               <button
                 className="primary"
-                disabled={!selected || solving}
+                disabled={publicDemo || !selected || solving}
                 onClick={() => plan()}
               >
                 <Zap size={15} />
@@ -721,7 +807,7 @@ function App() {
               <button
                 className="text-button"
                 onClick={openEditor}
-                disabled={!selected || solving}
+                disabled={publicDemo || !selected || solving}
               >
                 <Settings2 size={14} /> Editar dados
               </button>
@@ -1823,7 +1909,7 @@ function App() {
                   )}
                 </section>
               )}
-              {run && (
+              {run && !publicDemo && (
                 <section className="dispatch-callout">
                   <div>
                     <span className="eyebrow">PRÓXIMA ETAPA</span>
@@ -2023,8 +2109,9 @@ function App() {
                 }}
               >
                 <p className="modal-description">
-                  Se o servidor exigir autenticação, informe o token definido
-                  pelo responsável. Ele fica apenas na memória desta página.
+                  Visitantes podem explorar a demonstração sem token. Para
+                  administrar a operação, informe o token do responsável. Ele
+                  fica apenas na memória desta página.
                 </p>
                 <label>
                   Token
