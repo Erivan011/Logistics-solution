@@ -90,7 +90,7 @@ test("React + FastAPI: solve, edit version, simulate, compare and reload immutab
     "utf8",
   );
   let dom;
-  function render() {
+  function render(options = {}) {
     const console = new VirtualConsole();
     const failures = [];
     console.on("jsdomError", (error) => failures.push(error.message));
@@ -100,7 +100,20 @@ test("React + FastAPI: solve, edit version, simulate, compare and reload immutab
       virtualConsole: console,
     });
     d.window.structuredClone = structuredClone;
-    d.window.fetch = (url, options) => fetch(new URL(url, origin), options);
+    d.window.fetch = (url, requestOptions) => {
+      options.requests?.push({
+        url: String(url),
+        method: requestOptions?.method || "GET",
+        auth: requestOptions?.headers?.Authorization,
+      });
+      if (options.publicDemo && String(url) === "/api/health")
+        return Promise.resolve(
+          new Response(JSON.stringify({ authentication_required: true }), {
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+      return fetch(new URL(url, origin), requestOptions);
+    };
     d.window.HTMLElement.prototype.scrollIntoView = function () {};
     d.window.eval(compiled.outputFiles[0].text);
     return d;
@@ -230,4 +243,41 @@ test("React + FastAPI: solve, edit version, simulate, compare and reload immutab
   await until(() => !$(".dispatch-entry"));
   assert.equal($(".historical-banner"), null);
   assert.equal(button("Confirmar expedição"), undefined);
+  dom.window.close();
+  const requests = [];
+  dom = render({ publicDemo: true, requests });
+  w = dom.window;
+  $ = (selector) => w.document.querySelector(selector);
+  await until(() => $(".public-demo-banner"));
+  assert.equal($('[role="dialog"]'), null);
+  assert.ok(w.document.querySelectorAll(".route-card").length > 0);
+  assert.equal(button("Otimizar plano").disabled, true);
+  assert.equal(button("Editar dados").disabled, true);
+  assert.equal(button("Simular cenário").disabled, true);
+  assert.equal(
+    requests.some((r) => r.url.startsWith("/api/scenarios")),
+    false,
+  );
+  assert.equal(
+    requests.some((r) => r.method !== "GET"),
+    false,
+  );
+  button("Acesso administrativo").click();
+  await until(() => $('[role="dialog"] input[type="password"]'));
+  setInput(
+    w,
+    $('[role="dialog"] input[type="password"]'),
+    "ui-test-only-token",
+  );
+  $('[role="dialog"] form').dispatchEvent(
+    new w.Event("submit", { bubbles: true, cancelable: true }),
+  );
+  await until(() => !$(".public-demo-banner"));
+  assert.equal(button("Editar dados").disabled, false);
+  assert.ok(
+    requests.some(
+      (r) =>
+        r.url === "/api/scenarios" && r.auth === "Bearer ui-test-only-token",
+    ),
+  );
 });

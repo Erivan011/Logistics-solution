@@ -51,6 +51,8 @@ jobs:
                   raise SystemExit("Docker container did not become healthy")
               assert client.get("/").status_code == 200
               assert client.get("/api/scenarios").status_code == 401
+              assert client.get("/api/demo").json()["data"]["result"]["execution"]["verified"]
+              assert client.get("/api/demo/export.csv").status_code == 200
               authorized = client.get("/api/scenarios", headers={"Authorization": "Bearer container-smoke-test-only"})
               assert authorized.status_code == 200 and authorized.json()["data"]
           PYTHON

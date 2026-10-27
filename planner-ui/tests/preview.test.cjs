@@ -42,9 +42,12 @@ test("standalone preview renders recorded solver output and rejects mutations", 
   assert.equal(dom.window.document.querySelectorAll(".map-point").length, 18);
   assert.match($(".preview-note").textContent, /SOMENTE LEITURA/);
   assert.equal(dom.window.document.querySelectorAll(".metric-card").length, 4);
-  [...dom.window.document.querySelectorAll("button")]
-    .find((b) => b.textContent.trim() === "Otimizar plano")
-    .click();
-  await until(() => $(".error"));
-  assert.match($(".error").textContent, /somente leitura/);
+  const optimize = [...dom.window.document.querySelectorAll("button")].find(
+    (b) => b.textContent.trim() === "Otimizar plano",
+  );
+  assert.equal(optimize.disabled, true);
+  assert.equal($("[role=dialog]"), null);
+  assert.match($(".public-demo-banner").textContent, /SEM CADASTRO/);
+  const denied = await dom.window.fetch("/api/scenarios", { method: "POST" });
+  assert.equal(denied.status, 403);
 });
